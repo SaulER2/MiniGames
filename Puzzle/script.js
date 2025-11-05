@@ -143,7 +143,7 @@ function startGame() {
 
     // Scatter pieces randomly
     setTimeout(() => {
-        const rect = wrapper.getBoundingClientRect();
+        const rect = board.getBoundingClientRect();
         const boardW = rect.width;
         const boardH = rect.height;
         const margin = Math.min(boardW, boardH) * 0.6;

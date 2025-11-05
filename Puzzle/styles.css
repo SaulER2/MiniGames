@@ -112,12 +112,10 @@ main {
 
 #puzzleContainer {
   width: fit-content;
-  max-width: 100%;
   height: auto;
   background: #fafafa;
   border: 1px solid #ddd;
   box-sizing: border-box;
-  margin: 1rem 0;
   position: relative;
   display: block;
 }
@@ -161,14 +159,14 @@ main {
 
 
 @media (max-width: 700px) {
-  #puzzleContainer {
+
+  #puzzleWrapper {
     width: 92vw;
     height: calc(92vw * 9 / 16);
-    min-width: 260px;
-    min-height: 180px;
-  }
+  } 
 
   #preview {
     width: 90px;
+    height: 90px;
   }
 }
