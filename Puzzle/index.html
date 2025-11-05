@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Puzzle Game</title>
+</head>
+<body>
+    <header>
+        <a href="../index.html">🏚️</a>
+        <h1>Welcome to the Puzzle Game!</h1>
+    </header>
+    <p>Click the button below to add an image.</p>
+    <label for="puzzleImage" class="puzzleImage">Add Image</label>
+    <input type="file" id="puzzleImage" name="puzzleImage" accept="image/*" onchange="uploadImage()" />
+    <br/>
+    <img id="preview" alt="Preview"/>
+    <br/>
+    <p>Adjust the number of rows and columns that you want for the puzzle.</p>
+    <label for="columns">Number of columns:</label>
+    <input type="number" id="columns" name="columns" min="2" max="10" value="3"/>
+    <label for="rows">Number of rows:</label>
+    <input type="number" id="rows" name="rows" min="2" max="10" value="3"/>
+    <p>Start the game or reset pieces.</p>
+    <button id="startGameButton" onclick="startGame()">Start Game</button>
+    <button id="resetGameButton" onclick="resetGame()">Reset Game</button>
+    <main>
+        <section id="puzzleContainer">
+            <article id="puzzleWrapper" role="img"></article>
+        </section>
+    </main>
+    <script src="script.js"></script>
+</body>
+</html>
