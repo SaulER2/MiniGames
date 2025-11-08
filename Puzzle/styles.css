@@ -97,6 +97,10 @@ button:hover {
   object-fit: contain;
 }
 
+#timer{
+  display: none;
+}
+
 main {
   display: flex;
   margin-top: 15px;
@@ -113,7 +117,6 @@ main {
 #puzzleContainer {
   width: fit-content;
   height: auto;
-  background: #fafafa;
   border: 1px solid #ddd;
   box-sizing: border-box;
   position: relative;
@@ -125,7 +128,6 @@ main {
   touch-action: none;
   user-select: none;
   background: transparent;
-  background-color: black;
 }
 
 #puzzleWrapper canvas {
@@ -146,11 +148,12 @@ main {
 }
 
 #puzzleWrapper.started {
+
+  background-color: black;
   :last-child {
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
     ;
   }
-
   canvas {
 
     cursor: grab;

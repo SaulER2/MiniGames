@@ -6,6 +6,7 @@ const columns = document.getElementById('columns');
 const rows = document.getElementById('rows');
 const board = document.getElementById('puzzleContainer');
 const wrapper = document.getElementById('puzzleWrapper');
+const timer = document.getElementById('timer');
 
 let pieces = [];
 let img = new Image();
@@ -168,11 +169,19 @@ function startGame() {
             p.isPlaced = false; // Mark as not placed
             p.el.style.pointerEvents = 'auto'; // Enable interaction
         });
+
+        if (isChallenge && challengeDuration > 0) {
+            startTimer(challengeDuration);
+        }
+        if (isNormal) {
+            formatElapsed();
+        }
     }, 200); // Delay to ensure styles are applied
 }
 
 // Reset the game
 function resetGame() {
+    stopAllTimers();
     if (!imageLoaded || pieces.length === 0) return;
     
     // Mark game as not started
@@ -186,7 +195,202 @@ function resetGame() {
         p.isPlaced = false;
     });
 }
+// Timer variables
+let timerIntervalId = null;
+let timerTimeoutId = null;
+let timerEnd = 0;
+let rem = 0;
+let isChallenge = false;
+let challengeDuration = 0;
+const timeLimitId = 'timeLimit';
 
+let elapsedIntervalId = null;
+let elapsedStart = 0;
+const elapsedDisplayId = 'elapsedTime';
+let isNormal = false;
+
+// Format ms to "MM:SS"
+function formatTime(ms) {
+  if (ms <= 0) return '00:00';
+  const totalSec = Math.ceil(ms / 1000);
+  const min = Math.floor(totalSec / 60).toString().padStart(2, '0');
+  const sec = (totalSec % 60).toString().padStart(2, '0');
+  return `${min}:${sec}`;
+}
+
+// Action to execute when the timer ends
+function onTimerEnd() {
+  // Stop any timers (for safety)
+  stopTimer();
+
+  // Mark game as ended / deactivate ongoing game
+  wrapper.classList.remove('started');
+  timer.style.display = 'none';
+
+  // Disable pieces interaction
+  pieces.forEach(p => {
+    p.el.style.pointerEvents = 'none';
+  });
+
+  // Warn the user
+  setTimeout(() => {
+    alert('Time is up! Try again.');
+  }, 50);
+}
+
+// Start a countdown timer for the specified duration in ms
+function startTimer(durationMs) {
+  // clear any existing timer
+  stopTimer();
+
+  if (!timer) return;
+
+  // Create or update the time display element
+  let el = document.getElementById(timeLimitId);
+  if (!el) {
+    timer.style.display = 'block';
+    el = document.createElement('div');
+    el.id = timeLimitId;
+    timer.appendChild(el);
+  }
+
+  // configurar final y mostrar inmediatamente
+  timerEnd = Date.now() + durationMs;
+  el.textContent = `Tiempo: ${formatTime(durationMs)}`;
+
+  // Update every 250ms for smoother display
+  timerIntervalId = setInterval(() => {
+    const rem = timerEnd - Date.now();
+    if (rem <= 0) {
+      el.textContent = `Time: 00:00`;
+      // onTimerEnd will be executed from the timeout as well; here for safety
+      // we don't call onTimerEnd() twice, we just let the timeout do it.
+    } else {
+      el.textContent = `Time: ${formatTime(rem)}`;
+    }
+  }, 250);
+
+  // Final timeout that executes the action when finishing
+  timerTimeoutId = setTimeout(() => {
+    onTimerEnd();
+  }, durationMs);
+}
+
+// Stop and clear any active timer and hide the UI
+function stopTimer() {
+  if (timerIntervalId) {
+    clearInterval(timerIntervalId);
+    timerIntervalId = null;
+  }
+  if (timerTimeoutId) {
+    clearTimeout(timerTimeoutId);
+    timerTimeoutId = null;
+    wrapper.classList.remove('started');
+  }
+  timerEnd = 0;
+  const el = document.getElementById(timeLimitId);
+  if (el && timer.contains(el)) {
+    timer.style.display = 'none';
+    timer.removeChild(el);
+  }
+}
+
+function formatElapsed() {
+    stopElapsedTimer();
+    if (!timer) return;
+    
+    const countDownEl = document.getElementById(timeLimitId);
+    if (countDownEl && timer.contains(countDownEl)) timer.removeChild(countDownEl);
+
+    let el = document.getElementById(elapsedDisplayId);
+    if (!el) {
+        timer.style.display = 'block';
+        el = document.createElement('div');
+        el.id = elapsedDisplayId;
+        timer.appendChild(el);
+    }
+
+    elapsedStart = Date.now();
+    el.textContent = `Time: 00:00`;
+
+    elapsedIntervalId = setInterval(() => {
+        const elapsed = Date.now() - elapsedStart;
+        el.textContent = `Time: ${formatTime(elapsed)}`;
+    },250);
+}
+
+function stopElapsedTimer() {
+    if (elapsedIntervalId) {
+        clearInterval(elapsedIntervalId);
+        elapsedIntervalId = null;
+    }
+    const el = document.getElementById(elapsedDisplayId);
+    if (el && timer.contains(el)){
+        timer.style.display = 'none';
+        timer.removeChild(el)
+    } ;
+}
+
+function stopAllTimers() {
+    stopTimer();
+    stopElapsedTimer();
+}
+
+function challengeTimer() {
+    stopAllTimers();
+    timer.style.display = 'block';
+    if ((cols * rowsCount) <= 9) challengeDuration = 1 * 60 * 1000; // 1 min
+    if (9 < (cols * rowsCount) && (cols * rowsCount) <= 25) challengeDuration = 3 * 60 * 1000; // 3 min
+    if (25 < (cols * rowsCount) && (cols * rowsCount) <= 49) challengeDuration = 5 * 60 * 1000; // 5 min
+    if (49 < (cols * rowsCount) && (cols * rowsCount) <= 81) challengeDuration = 10 * 60 * 1000; // 10 min
+    if ((cols * rowsCount) > 81) challengeDuration = 15 * 60 * 1000; // 15 min
+
+    isChallenge = true;
+    isNormal = false;
+
+    let el = document.getElementById(timeLimitId);
+    if (!el) {
+        el = document.createElement("div");
+        el.id = timeLimitId;
+        timer.appendChild(el);
+    }
+    el.textContent = `Challenge mode ready: ${formatTime(challengeDuration)} - Start the game to begin!`;   
+}
+
+function updateChallengeDuration() {
+    stopAllTimers();
+    if ((cols * rowsCount) <= 9) challengeDuration = 1 * 60 * 1000;
+    if (9 < (cols * rowsCount) && (cols * rowsCount) <= 25) challengeDuration = 3 * 60 * 1000;
+    if (25 < (cols * rowsCount) && (cols * rowsCount) <= 49) challengeDuration = 5 * 60 * 1000;
+    if (49 < (cols * rowsCount) && (cols * rowsCount) <= 81) challengeDuration = 10 * 60 * 1000;
+    if ((cols * rowsCount) > 81) challengeDuration = 15 * 60 * 1000;
+
+    if (isChallenge) {
+        let el = document.getElementById(timeLimitId);
+        if (!el) {
+            el = document.createElement("div");
+            el.id = timeLimitId;
+            timer.appendChild(el);
+        }
+        el.textContent = `Challenge mode ready: ${formatTime(challengeDuration)} - Start the game to begin!`;
+    }
+}
+
+// Normal mode: stop any timers and show message
+function normalTimer() {
+    stopAllTimers();
+    timer.style.display = 'block';
+    isNormal = true;
+    isChallenge = false;
+
+    let el = document.getElementById(elapsedDisplayId);
+    if (!el) {
+        el = document.createElement("div");
+        el.id = elapsedDisplayId;
+        timer.appendChild(el);
+    }
+    el.textContent = `Normal mode ready - Start the game to begin!`;
+}
 // limit the value in a range
 function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 
@@ -323,14 +527,17 @@ function checkWinCondition() {
     // If all pieces are placed, show a congratulatory message
     if (allPlaced) {
         setTimeout(() => {
-            alert("¡Felicidades! Has completado el puzzle.");
+            if(isNormal) alert('Congratulation! You completed the puzzle in this time: '+ formatTime(Date.now() - elapsedStart) + '!');
+            else if(isChallenge) alert('Congratulation! You completed the puzzle with the following time remaining: ' + formatTime(Math.max(0, timerEnd - Date.now())) + '!');
+            else alert("Congratulation! You completed the puzzle" + /*(isNormal ? ("in this time: " + formatTime(Date.now() - elapsedStart)) : ("with the following time remaining: " + formatTime(Math.max(0, timerEnd - Date.now())))*/ "!");
             wrapper.classList.remove('started');
+            stopAllTimers();
+            isChallenge = false;
+            isNormal = false;
         }, 400);
     }
 }
 
 // Event listeners
-startButton.addEventListener('click', startGame);
-resetButton.addEventListener('click', resetGame);
-columns.addEventListener('change', () => { if (imageLoaded) createPieces(); });
-rows.addEventListener('change', () => { if (imageLoaded) createPieces(); });
+columns.addEventListener('change', () => { if (imageLoaded) createPieces(); updateChallengeDuration(); });
+rows.addEventListener('change', () => { if (imageLoaded) createPieces(); updateChallengeDuration(); });

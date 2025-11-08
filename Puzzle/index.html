@@ -23,8 +23,15 @@
     <label for="rows">Number of rows:</label>
     <input type="number" id="rows" name="rows" min="2" max="10" value="3"/>
     <p>Start the game or reset pieces.</p>
-    <button id="startGameButton" onclick="startGame()">Start Game</button>
-    <button id="resetGameButton" onclick="resetGame()">Reset Game</button>
+    <section>
+        <button id="startGameButton" onclick="startGame()">Start Game</button>
+        <button id="resetGameButton" onclick="resetGame()">Reset Game</button>
+    </section>
+    <section>
+        <button id="challengeMode" onclick="challengeTimer()">Challenge Mode</button>
+        <button id="normalMode" onclick="normalTimer()">Normal Mode</button>
+    </section>
+    <div id="timer">Timer</div>
     <main>
         <section id="puzzleContainer">
             <article id="puzzleWrapper" role="img"></article>
