@@ -278,16 +278,20 @@ function startTimer(durationMs) {
 
 // Stop and clear any active timer and hide the UI
 function stopTimer() {
+  // Clear interval
   if (timerIntervalId) {
     clearInterval(timerIntervalId);
     timerIntervalId = null;
   }
+  // Clear timeout
   if (timerTimeoutId) {
     clearTimeout(timerTimeoutId);
     timerTimeoutId = null;
     wrapper.classList.remove('started');
   }
+  // Reset end time
   timerEnd = 0;
+    // Remove time display element
   const el = document.getElementById(timeLimitId);
   if (el && timer.contains(el)) {
     timer.style.display = 'none';
@@ -295,13 +299,14 @@ function stopTimer() {
   }
 }
 
+// Format and show elapsed time in normal mode
 function formatElapsed() {
     stopElapsedTimer();
     if (!timer) return;
-    
+    // Remove countdown if present
     const countDownEl = document.getElementById(timeLimitId);
     if (countDownEl && timer.contains(countDownEl)) timer.removeChild(countDownEl);
-
+    // Create or update the elapsed time display element
     let el = document.getElementById(elapsedDisplayId);
     if (!el) {
         timer.style.display = 'block';
@@ -310,44 +315,55 @@ function formatElapsed() {
         timer.appendChild(el);
     }
 
+    // Start tracking elapsed time
     elapsedStart = Date.now();
     el.textContent = `Time: 00:00`;
 
+    // Update every 250ms
     elapsedIntervalId = setInterval(() => {
         const elapsed = Date.now() - elapsedStart;
         el.textContent = `Time: ${formatTime(elapsed)}`;
     },250);
 }
 
+// Stop and clear elapsed timer
 function stopElapsedTimer() {
+    // Clear start time
+    elapsedStart = 0;
     if (elapsedIntervalId) {
         clearInterval(elapsedIntervalId);
         elapsedIntervalId = null;
     }
+    // Remove elapsed time display element
     const el = document.getElementById(elapsedDisplayId);
     if (el && timer.contains(el)){
         timer.style.display = 'none';
         timer.removeChild(el)
-    } ;
+    };
 }
 
+// Stop all timers
 function stopAllTimers() {
     stopTimer();
     stopElapsedTimer();
 }
 
+// Challenge mode: set duration based on pieces and show message
 function challengeTimer() {
     stopAllTimers();
     timer.style.display = 'block';
+    // Determine challenge duration based on number of pieces
     if ((cols * rowsCount) <= 9) challengeDuration = 1 * 60 * 1000; // 1 min
     if (9 < (cols * rowsCount) && (cols * rowsCount) <= 25) challengeDuration = 3 * 60 * 1000; // 3 min
     if (25 < (cols * rowsCount) && (cols * rowsCount) <= 49) challengeDuration = 5 * 60 * 1000; // 5 min
     if (49 < (cols * rowsCount) && (cols * rowsCount) <= 81) challengeDuration = 10 * 60 * 1000; // 10 min
     if ((cols * rowsCount) > 81) challengeDuration = 15 * 60 * 1000; // 15 min
 
+    // Set mode flags
     isChallenge = true;
     isNormal = false;
 
+    // Create or update the time limit display element
     let el = document.getElementById(timeLimitId);
     if (!el) {
         el = document.createElement("div");
@@ -357,6 +373,7 @@ function challengeTimer() {
     el.textContent = `Challenge mode ready: ${formatTime(challengeDuration)} - Start the game to begin!`;   
 }
 
+// Update challenge duration based on current pieces
 function updateChallengeDuration() {
     stopAllTimers();
     if ((cols * rowsCount) <= 9) challengeDuration = 1 * 60 * 1000;
@@ -365,6 +382,7 @@ function updateChallengeDuration() {
     if (49 < (cols * rowsCount) && (cols * rowsCount) <= 81) challengeDuration = 10 * 60 * 1000;
     if ((cols * rowsCount) > 81) challengeDuration = 15 * 60 * 1000;
 
+    // Update display if in challenge mode
     if (isChallenge) {
         let el = document.getElementById(timeLimitId);
         if (!el) {
